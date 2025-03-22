@@ -6,66 +6,77 @@
     <title>MaiMai Bataan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-10">
-    <h1 class="text-4xl font-extrabold mb-8 text-center">Player Queue System</h1>
+<body class="bg-black text-white min-h-screen flex flex-col items-center py-10">
+    <h1 class="text-3xl font-bold mb-6 text-white">Player Queue System</h1>
     
     <!-- Admin Login -->
-    <div class="mt-6 w-full max-w-md" id="admin-login">
-        <input type="password" id="adminPassword" placeholder="Enter Admin Password" class="p-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-        <button onclick="adminLogin()" class="mt-4 w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg transition duration-200">Admin Login</button>
+    <div class="mt-6" id="admin-login">
+        <input type="password" id="adminPassword" placeholder="Enter Admin Password" class="p-2 rounded border border-gray-600 bg-gray-800 text-white">
+        <button onclick="adminLogin()" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded">Admin Login</button>
     </div>
 
     <!-- Admin Panel -->
     <div id="admin-panel" class="mt-6 hidden">
-        <button onclick="adminLogout()" class="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded-lg transition duration-200">Logout</button>
+        <button onclick="adminLogout()" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded">Logout</button>
     </div>
 
     <!-- Currently Playing List -->
     <div class="w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow-lg mt-6">
-        <h2 class="text-2xl font-semibold mb-4">Currently Playing</h2>
-        <div id="playingList" class="grid grid-cols-1 gap-2"></div>
+        <h2 class="text-xl font-semibold mb-4 text-white">Currently Playing</h2>
+        <div id="playingList" class="grid grid-cols-2 gap-2"></div>
     </div>
 
     <!-- Queue Display -->
     <div class="w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow-lg mt-6">
-        <h2 class="text-2xl font-semibold mb-4">Current Queue</h2>
+        <h2 class="text-xl font-semibold mb-4 text-white">Current Queue</h2>
         <p class="mb-2 text-gray-400">Total Queued Players: <span id="queueCount" class="font-bold text-white">0</span></p>
-        <div id="queueList" class="grid grid-cols-1 gap-2"></div>
+        <div id="queueList" class="grid grid-cols-2 gap-2"></div>
     </div>
 
-    <!-- Action Forms -->
-    <div class="mt-6 hidden" id="actionForms">
-        <div class="flex flex-col space-y-4">
-            <div class="flex space-x-2">
-                <input type="text" id="playerName" placeholder="Enter player name" class="p-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                <button onclick="addPlayer()" class="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg transition duration-200">Add Player</button>
-            </div>
-            <div class="flex space-x-2">
-                <input type="number" id="pos1" placeholder="Position 1" class="p-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                <input type="number" id="pos2" placeholder="Position 2" class="p-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                <button onclick="swapPlayers()" class="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg transition duration-200">Swap</button>
-            </div>
-            <div class="flex space-x-2">
-                <input type="number" id="deletePos" placeholder="Position to Delete" class="p-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                <button onclick="deletePlayerByPosition()" class="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded-lg transition duration-200">Delete Player</button>
-            </div>
-            <div class="flex space-x-2">
-                <input type="number" id="paidPos" placeholder="Position to Mark Paid" class="p-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                <button onclick="markPlayerPaid()" class="bg-green-600 hover:bg-green-500 text-white py-2 px-4 rounded-lg transition duration-200">Mark Paid</button>
-            </div>
-            <div class="flex space-x-2">
-                <button onclick="deleteTopPair()" class="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded-lg transition duration-200">Delete Top Pair</button>
-                <button onclick="nextPairPlaying()" class="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg transition duration-200">Next Pair Playing</button>
-                <button onclick="deleteCurrentlyPlaying()" class="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded-lg transition duration-200">Clear Currently Playing</button>
-                <button onclick="restartBackend()" class="bg-yellow-600 hover:bg-yellow-500 text-white py-2 px-4 rounded-lg transition duration-200">Server Restart</button>
-            </div>
-        </div>
+    <!-- Add Player Form -->
+    <div class="mt-6 hidden" id="addPlayer">
+        <input type="text" id="playerName" placeholder="Enter player name" class="p-2 rounded border border-gray-600 bg-gray-800 text-white">
+        <button onclick="addPlayer()" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded">Add Player</button>
+    </div>
+    
+    <!-- Swap Players Form -->
+    <div class="mt-6 hidden" id="swapPlayers">
+        <input type="number" id="pos1" placeholder="Position 1" class="p-2 rounded border border-gray-600 bg-gray-800 text-white">
+        <input type="number" id="pos2" placeholder="Position 2" class="p-2 rounded border border-gray-600 bg-gray-800 text-white">
+        <button onclick="swapPlayers()" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded">Swap</button>
+    </div>
+
+    <!-- Delete Player by Position -->
+    <div class="mt-6 hidden" id="deleteSection">
+        <input type="number" id="deletePos" placeholder="Position to Delete" class="p-2 rounded border border-gray-600 bg-gray-800 text-white">
+        <button onclick="deletePlayerByPosition()" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded">Delete Player</button>
+    </div>
+
+    <!-- Mark Player as Paid -->
+    <div class="mt-6 hidden" id="paidSection">
+        <input type="number" id="paidPos" placeholder="Position to Mark Paid" class="p-2 rounded border border-gray-600 bg-gray-800 text-white">
+        <button onclick="markPlayerPaid()" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded">Mark Paid</button>
+    </div>
+
+    <!-- Delete Top Pair Button -->
+    <div class="mt-6 hidden" id="deleteTopPair">
+        <button onclick="deleteTopPair()" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded">Delete Top Pair</button>
+    </div>
+
+    <!-- Next Pair Playing Button -->
+    <div class="mt-6 hidden" id="nextPairPlaying">
+        <button onclick="nextPairPlaying()" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded">Next Pair Playing</button>
+    </div>
+
+    <!-- Delete Currently Playing -->
+    <div class="mt-6 hidden" id="deleteCurrentlyPlaying">
+        <button onclick="deleteCurrentlyPlaying()" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded">Clear Currently Playing</button>
+    </div>
+
+    <!-- Server Restart -->
+    <div class="mt-6 hidden" id="restartBackend">
+        <button onclick="restartBackend()" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded">Server Restart</button>
     </div>
 
     <script>
@@ -79,7 +90,7 @@
             queueCount.textContent = queue.length;
             queue.forEach((player, index) => {
                 const div = document.createElement("div");
-                div.className = "p-3 bg-gray-700 rounded-lg text-center transition duration-200 hover:bg-gray-600";
+                div.className = "p-2 bg-gray-700 rounded text-center";
                 div.textContent = `${index + 1}. ${player.name} ${player.paid ? "(Paid)" : "(Unpaid)"}`;
                 queueList.appendChild(div);
             });
@@ -91,7 +102,15 @@
                 isAdmin = true;
                 document.getElementById('admin-login').style.display = 'none';
                 document.getElementById('admin-panel').style.display = 'block';
-                document.getElementById('actionForms').classList.remove('hidden');
+                document.getElementById('deleteSection').classList.remove('hidden');
+                document.getElementById('paidSection').classList.remove('hidden');
+                document.getElementById('swapPlayers').classList.remove('hidden');
+                document.getElementById('addPlayer').classList.remove('hidden');
+                document.getElementById('deleteTopPair').classList.remove('hidden');
+                document.getElementById('nextPairPlaying').classList.remove('hidden');
+                document.getElementById('deleteCurrentlyPlaying').classList.remove('hidden');
+                document.getElementById('restartBackend').classList.remove('hidden');
+
                 alert('Admin login successful!');
             } else {
                 alert('Incorrect password!');
@@ -102,7 +121,14 @@
             isAdmin = false;
             document.getElementById('admin-panel').style.display = 'none';
             document.getElementById('admin-login').style.display = 'block';
-            document.getElementById('actionForms').classList.add('hidden');
+            document.getElementById('deleteSection').classList.add('hidden');
+            document.getElementById('paidSection').classList.add('hidden');
+            document.getElementById('addPlayer').classList.add('hidden');
+            document.getElementById('swapPlayers').classList.add('hidden');
+            document.getElementById('deleteTopPair').classList.add('hidden');
+            document.getElementById('nextPairPlaying').classList.add('hidden');
+            document.getElementById('deleteCurrentlyPlaying').classList.add('hidden');
+            document.getElementById('restartBackend').classList.add('hidden');
             alert('Logged out successfully!');
         }
 
@@ -142,6 +168,10 @@
             socket.emit("deleteTopPair");
         }
 
+        function showCurrentPair() {
+            socket.emit('getCurrentPair');
+        }
+
         function nextPairPlaying() {
             socket.emit("nextPairPlaying");
         }
@@ -172,7 +202,7 @@
             playingList.innerHTML = "";
             playing.forEach((player, index) => {
                 const div = document.createElement("div");
-                div.className = "p-3 bg-green-700 rounded-lg text-center transition duration-200 hover:bg-green-600";
+                div.className = "p-2 bg-green-700 rounded text-center";
                 div.textContent = `${index + 1}. ${player.name} (Playing)`;
                 playingList.appendChild(div);
             });
