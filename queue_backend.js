@@ -80,41 +80,49 @@ io.on("connection", (socket) => {
   });
 
   // Add Player
-  socket.on("addPlayer", (playerName) => {
+  socket.on("addPlayer", async (playerName) => {
+    let queue = await getQueue();
     queue.push({ name: playerName, paid: false });
+    await updateQueue(queue);
     io.emit("queueUpdate", queue);
   });
 
   // Swap Players
-  socket.on("swapPlayers", ({ pos1, pos2 }) => {
+  socket.on("swapPlayers", async ({ pos1, pos2 }) => {
+    let queue = await getQueue();
     if (pos1 >= 0 && pos2 >= 0 && pos1 < queue.length && pos2 < queue.length) {
       [queue[pos1], queue[pos2]] = [queue[pos2], queue[pos1]];
+      await updateQueue(queue);
       io.emit("queueUpdate", queue);
     }
   });
 
   // Delete Top Pair
-  socket.on("deleteTopPair", () => {
-    if (queue.length >= 2) {
-      queue.splice(0, 2);
-    } else if (queue.length === 1) {
-      queue.splice(0, 1);
+  socket.on("deletePlayerByPosition", async (pos) => {
+    let queue = await getQueue();
+    if (pos >= 0 && pos < queue.length) {
+      queue.splice(pos, 1);
+      await updateQueue(queue);
+      io.emit("queueUpdate", queue);
     }
-    io.emit("queueUpdate", queue);
   });
 
   // Delete Player by Position
-  socket.on("deletePlayerByPosition", (pos) => {
+  socket.on("deletePlayerByPosition", async (pos) => {
+    let queue = await getQueue();
     if (pos >= 0 && pos < queue.length) {
       queue.splice(pos, 1);
+      await updateQueue(queue);
       io.emit("queueUpdate", queue);
     }
   });
 
   // Mark Player as Paid
-  socket.on("markPlayerPaid", (pos) => {
+  socket.on("markPlayerPaid", async (pos) => {
+    let queue = await getQueue();
     if (pos >= 0 && pos < queue.length) {
       queue[pos].paid = true;
+      await updateQueue(queue);
       io.emit("queueUpdate", queue);
     }
   });
