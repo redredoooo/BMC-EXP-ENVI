@@ -11,7 +11,55 @@ const io = socketIo(server, {
   }
 });
 
+const { google } = require('googleapis');
+const SPREADSHEET_ID = 'YOUR_SHEET_ID';
+const auth = new google.auth.GoogleAuth({
+  keyFile: 'credentials.json',
+  scopes: 'https://www.googleapis.com/auth/spreadsheets',
+});
+
+async function updateSheet() {
+  const sheets = google.sheets({ version: 'v4', auth });
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: SPREADSHEET_ID,
+    range: 'Queue!A2:C',
+    valueInputOption: 'RAW',
+    resource: { values: queue.map((p, i) => [i+1, p.name, p.paid ? "Yes" : "No"]) }
+  });
+  
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: SPREADSHEET_ID,
+    range: 'History!A2:C',
+    valueInputOption: 'RAW',
+    resource: { values: history.map(h => [h.players.join(", "), h.timestamp]) }
+  });
+}
+
+async function loadInitialData() {
+  const sheets = google.sheets({ version: 'v4', auth });
+  const queueRes = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range: 'Queue!A2:C',
+  });
+  queue = queueRes.data.values.map(row => ({
+    name: row[1],
+    paid: row[2] === "Yes"
+  }));
+  
+  const historyRes = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range: 'History!A2:B',
+  });
+  history = historyRes.data.values.map(row => ({
+    players: row[0].split(", "),
+    timestamp: row[1]
+  }));
+}
+
+loadInitialData();
+
 let queue = [];
+let history = [];
 let currentlyPlaying = [];
 let adminAuthenticated = false;
 const adminPassword = "Nachi";
@@ -87,11 +135,15 @@ io.on("connection", (socket) => {
       // Replace current pair if already playing
       if (currentlyPlaying.length > 0) {
         currentlyPlaying = []; // Clear existing pair
+        history.push({
+          players: currentlyPlaying.map(p => p.name),
+          timestamp: new Date().toLocaleString("en-PH", { timeZone: "Asia/Manila" })
       }
       currentlyPlaying = pair; // Add new pair to currently playing
-  
       io.emit("queueUpdate", queue);
       io.emit("playingUpdate", currentlyPlaying);
+      io.emit("historyUpdate", history);
+      updateSheet();
     } else {
       socket.emit("errorMessage", "Not enough players in the queue.");
     }
@@ -99,9 +151,16 @@ io.on("connection", (socket) => {
 
   // Clear Currently Playing
   socket.on("deleteCurrentlyPlaying", () => {
+  if(currentlyPlaying.length > 0) {
+    history.push({
+      players: currentlyPlaying.map(p => p.name),
+      timestamp: new Date().toLocaleString("en-PH", { timeZone: "Asia/Manila" })
+    });
     currentlyPlaying = [];
     io.emit("playingUpdate", currentlyPlaying);
-  });
+    io.emit("historyUpdate", history);
+    updateSheet();
+  }
 });
 
 
